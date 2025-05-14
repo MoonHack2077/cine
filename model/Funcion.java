@@ -22,12 +22,11 @@ public class Funcion {
         return false;
     }
 
-    public boolean reservarAsiento(Asiento asiento, Espectador espectador) {
+    public boolean reservarAsiento(Asiento asiento) {
         if (asiento.esLibre()) {
             System.out.println("Error: El asiento " + asiento.getIdAsiento() + " ya está reservado.");
             return false;
         }
-        asiento.reservar(espectador);
         return true;
     }
 

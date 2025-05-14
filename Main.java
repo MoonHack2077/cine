@@ -196,8 +196,9 @@ public class Main {
 
         Asiento asiento = seleccionarAsiento(funcion.getSala());
         if (asiento == null) return;
+        asiento.reservar(espectador); // Asignar el espectador al asiento
 
-        boolean exito = funcion.reservarAsiento(asiento, espectador);
+        boolean exito = funcion.reservarAsiento(asiento);
         if (exito) {
             JOptionPane.showMessageDialog(null, "Ticket comprado con éxito. ID Espectador: " + idEspectador + ", Asiento: " + asiento.getIdAsiento(), "Comprar Ticket", JOptionPane.INFORMATION_MESSAGE);
         } else {
@@ -235,22 +236,49 @@ public class Main {
     }
 
     private static Asiento seleccionarAsiento(Sala sala) {
-        String[] opcionesAsiento = new String[sala.getAsientos().size()];
-        for (int i = 0; i < sala.getAsientos().size(); i++) {
-            opcionesAsiento[i] = sala.getAsientos().get(i).getIdAsiento();
-        }
-
-        String asientoSeleccionado = (String) JOptionPane.showInputDialog(null, "Seleccione el asiento:", "Comprar Ticket", JOptionPane.QUESTION_MESSAGE, null, opcionesAsiento, opcionesAsiento[0]);
-
-        if (asientoSeleccionado == null) return null;
-
-        Asiento asiento = sala.buscarAsiento(asientoSeleccionado);
-        if (asiento.esLibre()) {
-            JOptionPane.showMessageDialog(null, "El asiento " + asiento.getIdAsiento() + " no está disponible.", "Error", JOptionPane.ERROR_MESSAGE);
-            return null;
-        }
-        return asiento;
+    // Es recomendable mostrar el estado de los asientos (Libre/Ocupado) en la lista de selección.
+    // Por ahora, asumimos que el usuario puede intentar seleccionar cualquier asiento.
+    // Puedes mejorar el String[] opcionesAsiento para que indique el estado.
+    String[] opcionesAsiento = new String[sala.getAsientos().size()];
+    for (int i = 0; i < sala.getAsientos().size(); i++) {
+        Asiento currentAsiento = sala.getAsientos().get(i);
+        String estado = currentAsiento.esLibre() ? " (Libre)" : " (Ocupado)";
+        opcionesAsiento[i] = currentAsiento.getIdAsiento() + estado;
     }
+
+    String asientoSeleccionadoConEstado = (String) JOptionPane.showInputDialog(null,
+            "Seleccione el asiento:",
+            "Comprar Ticket",
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            opcionesAsiento,
+            opcionesAsiento.length > 0 ? opcionesAsiento[0] : null);
+
+    if (asientoSeleccionadoConEstado == null) {
+        return null; // El usuario canceló
+    }
+
+    // Extraer solo el ID del asiento (ej. "A1C1" de "A1C1 (Libre)")
+    String asientoSeleccionadoId = asientoSeleccionadoConEstado.split(" ")[0];
+    Asiento asiento = sala.buscarAsiento(asientoSeleccionadoId);
+
+    if (asiento == null) {
+        // Esto no debería ocurrir si la selección es válida
+        JOptionPane.showMessageDialog(null, "Asiento no encontrado.", "Error", JOptionPane.ERROR_MESSAGE);
+        return null;
+    }
+
+    // Lógica corregida:
+    if (!asiento.esLibre()) { // Si el asiento NO está libre (es decir, está ocupado)
+        JOptionPane.showMessageDialog(null, "El asiento " + asiento.getIdAsiento() + " ya está ocupado y no está disponible.", "Error", JOptionPane.ERROR_MESSAGE);
+        return null; // Impedir seleccionar un asiento ya ocupado
+    }
+
+    // Si llegamos aquí, el asiento está libre y es válido para la selección
+    return asiento;
+}
+
+
 
     private static void mostrarPuestosDisponiblesYOcupados() {
         Funcion funcion = seleccionarFuncionParaMostrarAsientos();

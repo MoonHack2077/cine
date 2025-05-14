@@ -86,17 +86,57 @@ public class Sala {
     public void setTecnologiaDeProyeccion(String tecnologiaDeProyeccion) {
         this.tecnologiaDeProyeccion = tecnologiaDeProyeccion;
     }
+    // Dentro de la clase Sala en model/Sala.java
+public String getEstadoCompletoAsientos() {
+    StringBuilder sb = new StringBuilder();
+    List<String> disponibles = new ArrayList<>();
+    List<String> ocupados = new ArrayList<>();
 
-    public String mostrarDisponibles(){
-        String[] disponibles = new String[asientos.size()];
-        int i = 0;
-        for (Asiento asiento : asientos) {
-            if (asiento.esLibre()) {
-                disponibles[i] = asiento.getIdAsiento();
-                i++;
+    for (Asiento asiento : asientos) {
+        if (asiento.esLibre()) {
+            disponibles.add(asiento.getIdAsiento());
+        } else {
+            String detalleOcupado = asiento.getIdAsiento();
+            if (asiento.getEspectador() != null) {
+                detalleOcupado += " (Ocupado por: " + asiento.getEspectador().getNombre() + ")";
+            } else {
+                detalleOcupado += " (Ocupado)";
             }
+            ocupados.add(detalleOcupado);
         }
-        return Arrays.toString(disponibles);
     }
+
+    sb.append("Asientos Disponibles:\n");
+    if (disponibles.isEmpty()) {
+        sb.append("  Ninguno\n");
+    } else {
+        sb.append("  ").append(String.join(", ", disponibles)).append("\n");
+    }
+
+    sb.append("\nAsientos Ocupados:\n");
+    if (ocupados.isEmpty()) {
+        sb.append("  Ninguno\n");
+    } else {
+        sb.append("  ").append(String.join(", ", ocupados)).append("\n");
+    }
+
+    return sb.toString();
+}
+
+    // Dentro de la clase Sala en model/Sala.java
+public String mostrarDisponibles() {
+    List<String> disponiblesList = new ArrayList<>();
+    for (Asiento asiento : asientos) {
+        if (asiento.esLibre()) {
+            disponiblesList.add(asiento.getIdAsiento());
+        }
+    }
+    if (disponiblesList.isEmpty()) {
+        return "No hay asientos disponibles.";
+    }
+    // Puedes ajustar el formato como prefieras, ej:
+    // return String.join(", ", disponiblesList);
+    return "Asientos disponibles: " + disponiblesList.toString();
+}
     
 }
